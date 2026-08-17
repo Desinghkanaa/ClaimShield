@@ -1,0 +1,6 @@
+@ClaimShield.Api_HostAddress = http://localhost:5101
+
+GET {{ClaimShield.Api_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###

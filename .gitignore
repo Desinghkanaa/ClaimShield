@@ -1,0 +1,13 @@
+**/bin/
+**/obj/
+**/*.user
+**/node_modules/
+**/tessdata/
+**/dist/
+**/dist-ssr/
+ClaimShield.Api/appsettings.json
+ClaimShield.Api/appsettings.Development.json
+claimshield-web/.env
+claimshield-web/.env.local
+.DS_Store
+*.log
