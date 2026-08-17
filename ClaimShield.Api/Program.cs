@@ -15,6 +15,20 @@ using Microsoft.IdentityModel.Protocols.OpenIdConnect;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 
+// ============================================================
+// DISABLE CONFIGURATION FILE WATCHING
+// ============================================================
+//
+// Render's container has a low inotify/file-watcher limit.
+// ASP.NET Core normally watches appsettings.json for changes.
+// This is useful during local development but is not required
+// in the Render production container.
+//
+
+Environment.SetEnvironmentVariable(
+    "DOTNET_HOSTBUILDER__RELOADCONFIGONCHANGE",
+    "false");
+
 var builder = WebApplication.CreateBuilder(args);
 
 // ============================================================
@@ -32,20 +46,20 @@ builder.Services.AddDbContext<ClaimShieldDbContext>(
         options.UseNpgsql(
             builder.Configuration.GetConnectionString(
                 "SupabaseConnection"),
-            npgsqlOptions => npgsqlOptions.EnableRetryOnFailure()
+            npgsqlOptions =>
+                npgsqlOptions.EnableRetryOnFailure()
         )
 );
 
 // ============================================================
 // SUPABASE JWT CONFIGURATION
 // ============================================================
-//
-// Supabase's Auth server signs tokens asymmetrically (ES256) and
-// only exposes a raw JWKS document - no OIDC discovery document -
-// so token validation is wired to that JWKS URL directly via
-// SupabaseJwksConfigurationRetriever instead of the usual
-// `Authority` auto-discovery.
-//
+
+// Supabase's Auth server signs tokens asymmetrically (ES256)
+// and only exposes a raw JWKS document - no OIDC discovery
+// document - so token validation is wired to that JWKS URL
+// directly via SupabaseJwksConfigurationRetriever instead of
+// the usual Authority auto-discovery.
 
 var supabaseUrl =
     builder.Configuration["Supabase:Url"];
@@ -106,10 +120,7 @@ builder.Services
 builder.Services.AddAuthorization();
 
 // ------------------------------------------------------------
-// Role claims transformation (resolves the app's Customer/
-// Surveyor/Approver/Admin role from public.profiles on every
-// request - Supabase's own JWT role claim is just "authenticated"
-// and isn't this app's role).
+// Role claims transformation
 // ------------------------------------------------------------
 
 builder.Services.AddTransient<
@@ -119,15 +130,11 @@ builder.Services.AddTransient<
 // ============================================================
 // HTTP CONTEXT ACCESSOR
 // ============================================================
-//
-// Required by MockAiService to read the authenticated
-// user's JWT identity and verify claim ownership.
-//
 
 builder.Services.AddHttpContextAccessor();
 
 // ------------------------------------------------------------
-// Current User (identity from the authenticated JWT claims)
+// Current User
 // ------------------------------------------------------------
 
 builder.Services.AddScoped<
@@ -213,113 +220,49 @@ builder.Services.AddSwaggerGen(options =>
 // REPOSITORIES
 // ============================================================
 
-// ------------------------------------------------------------
-// Users
-// ------------------------------------------------------------
-//
-// Required by MockAiService to resolve:
-//
-// SurveyorId -> User -> Surveyor Name
-//
-// RepairerId -> User -> Repairer Name
-//
-
 builder.Services.AddScoped<
     IUserRepository,
     UserRepository>();
-
-// ------------------------------------------------------------
-// Customer
-// ------------------------------------------------------------
-//
-// Required by MockAiService to verify:
-//
-// JWT UserId
-//      ↓
-// Customer.UserId
-//      ↓
-// Claim.CustomerId
-//
 
 builder.Services.AddScoped<
     ICustomerRepository,
     CustomerRepository>();
 
-// ------------------------------------------------------------
-// Claims
-// ------------------------------------------------------------
-
 builder.Services.AddScoped<
     IClaimRepository,
     ClaimRepository>();
-
-// ------------------------------------------------------------
-// Claim Documents
-// ------------------------------------------------------------
 
 builder.Services.AddScoped<
     IClaimDocumentRepository,
     ClaimDocumentRepository>();
 
-// ------------------------------------------------------------
-// Payments
-// ------------------------------------------------------------
-
 builder.Services.AddScoped<
     IPaymentRepository,
     PaymentRepository>();
-
-// ------------------------------------------------------------
-// Survey Assignments
-// ------------------------------------------------------------
 
 builder.Services.AddScoped<
     ISurveyAssignmentRepository,
     SurveyAssignmentRepository>();
 
-// ------------------------------------------------------------
-// Repair Assignments
-// ------------------------------------------------------------
-
 builder.Services.AddScoped<
     IRepairAssignmentRepository,
     RepairAssignmentRepository>();
-
-// ------------------------------------------------------------
-// Repair Estimates
-// ------------------------------------------------------------
 
 builder.Services.AddScoped<
     IRepairEstimateRepository,
     RepairEstimateRepository>();
 
-// ------------------------------------------------------------
-// Survey Reports
-// ------------------------------------------------------------
-
 builder.Services.AddScoped<
     ISurveyReportRepository,
     SurveyReportRepository>();
-
-// ------------------------------------------------------------
-// Policies
-// ------------------------------------------------------------
 
 builder.Services.AddScoped<
     IPolicyRepository,
     PolicyRepository>();
 
-// ------------------------------------------------------------
-// Vehicles
-// ------------------------------------------------------------
-
 builder.Services.AddScoped<
     IVehicleRepository,
     VehicleRepository>();
-
-// ------------------------------------------------------------
-// Roles
-// ------------------------------------------------------------
 
 builder.Services.AddScoped<
     IRoleRepository,
@@ -329,81 +272,41 @@ builder.Services.AddScoped<
 // SERVICES
 // ============================================================
 
-// ------------------------------------------------------------
-// Customer
-// ------------------------------------------------------------
-
 builder.Services.AddScoped<
     ICustomerService,
     CustomerService>();
-
-// ------------------------------------------------------------
-// Claims
-// ------------------------------------------------------------
 
 builder.Services.AddScoped<
     IClaimService,
     ClaimService>();
 
-// ------------------------------------------------------------
-// Claim Documents
-// ------------------------------------------------------------
-
 builder.Services.AddScoped<
     IClaimDocumentService,
     ClaimDocumentService>();
-
-// ------------------------------------------------------------
-// Payments
-// ------------------------------------------------------------
 
 builder.Services.AddScoped<
     IPaymentService,
     PaymentService>();
 
-// ------------------------------------------------------------
-// Survey Assignments
-// ------------------------------------------------------------
-
 builder.Services.AddScoped<
     ISurveyAssignmentService,
     SurveyAssignmentService>();
-
-// ------------------------------------------------------------
-// Repair Assignments
-// ------------------------------------------------------------
 
 builder.Services.AddScoped<
     IRepairAssignmentService,
     RepairAssignmentService>();
 
-// ------------------------------------------------------------
-// Repair Estimates
-// ------------------------------------------------------------
-
 builder.Services.AddScoped<
     IRepairEstimateService,
     RepairEstimateService>();
-
-// ------------------------------------------------------------
-// Survey Reports
-// ------------------------------------------------------------
 
 builder.Services.AddScoped<
     ISurveyReportService,
     SurveyReportService>();
 
-// ------------------------------------------------------------
-// Claim Approval
-// ------------------------------------------------------------
-
 builder.Services.AddScoped<
     IClaimApprovalService,
     ClaimApprovalService>();
-
-// ------------------------------------------------------------
-// Claim AI Scoring
-// ------------------------------------------------------------
 
 builder.Services.AddScoped<
     IClaimScoringService,
@@ -417,33 +320,29 @@ builder.Services.AddScoped<
     IScoringThresholdService,
     ScoringThresholdService>();
 
-// ------------------------------------------------------------
-// Dashboard
-// ------------------------------------------------------------
-
 builder.Services.AddScoped<
     IDashboardService,
     DashboardService>();
 
-// ------------------------------------------------------------
-// OTP (Phase 12 - shared by Login and Instant Claim Accept)
-// ------------------------------------------------------------
+// ============================================================
+// OTP
+// ============================================================
 
 builder.Services.AddScoped<
     IOtpService,
     OtpService>();
 
-// ------------------------------------------------------------
-// OCR (Phase 12 - RC/plate photo extraction)
-// ------------------------------------------------------------
+// ============================================================
+// OCR
+// ============================================================
 
 builder.Services.AddScoped<
     IOcrService,
     TesseractOcrService>();
 
-// ------------------------------------------------------------
-// Instant Claim (Phase 12 - Estimate Engine + config)
-// ------------------------------------------------------------
+// ============================================================
+// INSTANT CLAIM
+// ============================================================
 
 builder.Services.AddScoped<
     IEstimateEngineService,
@@ -457,89 +356,89 @@ builder.Services.AddScoped<
     IClaimRaiseService,
     ClaimRaiseService>();
 
-// ------------------------------------------------------------
-// Audit Log
-// ------------------------------------------------------------
+// ============================================================
+// AUDIT LOG
+// ============================================================
 
 builder.Services.AddScoped<
     IAuditLogService,
     AuditLogService>();
 
-// ------------------------------------------------------------
-// Claim Decisions (Surveyor maker-checker workflow)
-// ------------------------------------------------------------
+// ============================================================
+// CLAIM DECISIONS
+// ============================================================
 
 builder.Services.AddScoped<
     IClaimDecisionService,
     ClaimDecisionService>();
 
-// ------------------------------------------------------------
-// Reassessment Comments
-// ------------------------------------------------------------
+// ============================================================
+// REASSESSMENT COMMENTS
+// ============================================================
 
 builder.Services.AddScoped<
     IReassessmentCommentService,
     ReassessmentCommentService>();
 
-// ------------------------------------------------------------
-// Authority Limits
-// ------------------------------------------------------------
+// ============================================================
+// AUTHORITY LIMITS
+// ============================================================
 
 builder.Services.AddScoped<
     IAuthorityLimitService,
     AuthorityLimitService>();
 
-// ------------------------------------------------------------
-// Users
-// ------------------------------------------------------------
+// ============================================================
+// USERS
+// ============================================================
 
 builder.Services.AddScoped<
     IUserService,
     UserService>();
 
-// ------------------------------------------------------------
-// Supabase Admin API (user provisioning)
-// ------------------------------------------------------------
+// ============================================================
+// SUPABASE ADMIN API
+// ============================================================
 
 builder.Services.AddHttpClient<
     ISupabaseAdminService,
     SupabaseAdminService>();
 
-// ------------------------------------------------------------
-// Supabase Storage API (claim document uploads/downloads)
-// ------------------------------------------------------------
+// ============================================================
+// SUPABASE STORAGE API
+// ============================================================
 
 builder.Services.AddHttpClient<
     ISupabaseStorageService,
     SupabaseStorageService>();
 
-// ------------------------------------------------------------
-// Roles
-// ------------------------------------------------------------
+// ============================================================
+// ROLES
+// ============================================================
 
 builder.Services.AddScoped<
     IRoleService,
     RoleService>();
 
-// ------------------------------------------------------------
-// Vehicles
-// ------------------------------------------------------------
+// ============================================================
+// VEHICLES
+// ============================================================
 
 builder.Services.AddScoped<
     IVehicleService,
     VehicleService>();
 
-// ------------------------------------------------------------
-// Policies
-// ------------------------------------------------------------
+// ============================================================
+// POLICIES
+// ============================================================
 
 builder.Services.AddScoped<
     IPolicyService,
     PolicyService>();
 
-// ------------------------------------------------------------
-// Claim Closure
-// ------------------------------------------------------------
+// ============================================================
+// CLAIM CLOSURE
+// ============================================================
 
 builder.Services.AddScoped<
     IClaimClosureService,
@@ -548,10 +447,9 @@ builder.Services.AddScoped<
 // ============================================================
 // AI SERVICE
 // ============================================================
-//
+
 // Development AI uses ClaimShield's existing services.
 // No OpenAI API key is required.
-//
 
 builder.Services.AddScoped<
     IAiService,
