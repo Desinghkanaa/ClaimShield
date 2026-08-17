@@ -1,0 +1,40 @@
+<svg width="320" height="280" viewBox="0 0 320 280" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="bg3" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#fff3cd"/>
+      <stop offset="100%" stop-color="#ffe9ac"/>
+    </linearGradient>
+  </defs>
+  <circle cx="160" cy="140" r="120" fill="url(#bg3)"/>
+
+  <!-- wallet -->
+  <rect x="88" y="110" width="144" height="96" rx="14" fill="#ffffff" stroke="#1f5fbf" stroke-width="3.5"/>
+  <path d="M88 138 H232" stroke="#1f5fbf" stroke-width="2" opacity="0.5"/>
+  <rect x="182" y="150" width="52" height="34" rx="8" fill="#1f5fbf"/>
+  <circle cx="196" cy="167" r="6" fill="#ffe9ac"/>
+
+  <!-- bank note peeking out -->
+  <rect x="104" y="88" width="86" height="46" rx="6" fill="#e6f1fb" stroke="#164a99" stroke-width="2"/>
+  <circle cx="147" cy="111" r="12" fill="#ffffff" stroke="#164a99" stroke-width="2"/>
+  <text x="147" y="116" font-family="Arial, sans-serif" font-size="13" font-weight="700" fill="#164a99" text-anchor="middle">₹</text>
+
+  <!-- lightning bolt: instant -->
+  <path d="M170 40 L150 78 L165 78 L152 112 L188 68 L172 68 Z" fill="#7a5c00"/>
+  <path d="M170 40 L150 78 L165 78 L152 112 L188 68 L172 68 Z" fill="#fff3cd" opacity="0.4"/>
+
+  <!-- confetti dots -->
+  <g fill="#1e7e34">
+    <circle cx="64" cy="90" r="4"/>
+    <circle cx="244" cy="96" r="4"/>
+    <circle cx="252" cy="150" r="3.5"/>
+  </g>
+  <g fill="#1f5fbf">
+    <circle cx="58" cy="140" r="3.5"/>
+    <circle cx="70" cy="200" r="4"/>
+    <circle cx="238" cy="210" r="3.5"/>
+  </g>
+
+  <!-- success check badge -->
+  <circle cx="220" cy="200" r="22" fill="#1e7e34"/>
+  <path d="M209 200 L217 208 L233 190" stroke="#ffffff" stroke-width="5" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>
