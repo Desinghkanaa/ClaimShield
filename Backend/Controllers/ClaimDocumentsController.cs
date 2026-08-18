@@ -170,7 +170,7 @@ namespace ClaimShield.Api.Controllers
         public async Task<IActionResult> Upload(
             [FromForm] Guid claimId,
             [FromForm] int documentTypeId,
-            [FromForm] IFormFile file)
+                IFormFile file)
         {
             if (!_currentUserService.UserId.HasValue)
             {
