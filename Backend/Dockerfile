@@ -3,12 +3,15 @@ FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
 
 WORKDIR /src
 
-COPY ClaimShield.Api.csproj .
-RUN dotnet restore
+COPY Backend/ClaimShield.Api.csproj Backend/
+RUN dotnet restore Backend/ClaimShield.Api.csproj
 
-COPY . .
-RUN dotnet publish ClaimShield.Api.csproj -c Release -o /app/publish /p:UseAppHost=false
+COPY Backend/ Backend/
 
+RUN dotnet publish Backend/ClaimShield.Api.csproj \
+    -c Release \
+    -o /app/publish \
+    /p:UseAppHost=false
 
 # Runtime stage
 FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS final
