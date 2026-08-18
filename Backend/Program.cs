@@ -598,23 +598,27 @@ app.UseStaticFiles();
 // SWAGGER
 // ============================================================
 
-if (app.Environment.IsDevelopment())
-{
-    app.UseDeveloperExceptionPage();
+// if (app.Environment.IsDevelopment())
+// {
+//     app.UseDeveloperExceptionPage();
 
-    app.UseSwagger();
+//     app.UseSwagger();
 
-    app.UseSwaggerUI(
-        options =>
-        {
-            options.DocumentTitle =
-                "ClaimShield API";
+//     app.UseSwaggerUI(
+//         options =>
+//         {
+//             options.DocumentTitle =
+//                 "ClaimShield API";
 
-            options.SwaggerEndpoint(
-                "/swagger/v1/swagger.json",
-                "ClaimShield API v1");
-        });
-}
+//             options.SwaggerEndpoint(
+//                 "/swagger/v1/swagger.json",
+//                 "ClaimShield API v1");
+//         });
+// }
+
+app.UseSwagger();
+app.UseSwaggerUI();
+
 
 // ============================================================
 // HTTPS
