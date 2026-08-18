@@ -1,0 +1,37 @@
+<svg width="320" height="280" viewBox="0 0 320 280" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="bg2" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#e3f6f2"/>
+      <stop offset="100%" stop-color="#d5f0ea"/>
+    </linearGradient>
+  </defs>
+  <circle cx="160" cy="140" r="120" fill="url(#bg2)"/>
+
+  <!-- shield -->
+  <path d="M160 46 L222 70 L222 132 C222 176 196 206 160 224 C124 206 98 176 98 132 L98 70 Z"
+        fill="#ffffff" stroke="#1f5fbf" stroke-width="3.5"/>
+  <path d="M160 46 L222 70 L222 132 C222 176 196 206 160 224 C124 206 98 176 98 132 L98 70 Z"
+        fill="#1f5fbf" opacity="0.06"/>
+
+  <!-- scan lines sweeping -->
+  <g stroke="#0f8a72" stroke-width="2" opacity="0.5">
+    <line x1="112" y1="96" x2="208" y2="96"/>
+    <line x1="112" y1="118" x2="208" y2="118"/>
+    <line x1="112" y1="140" x2="208" y2="140"/>
+  </g>
+
+  <!-- big checkmark -->
+  <circle cx="160" cy="150" r="30" fill="#1e7e34"/>
+  <path d="M146 150 L156 160 L176 138" stroke="#ffffff" stroke-width="6" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+
+  <!-- magnifier -->
+  <circle cx="222" cy="182" r="20" fill="#ffffff" stroke="#0f8a72" stroke-width="4"/>
+  <line x1="236" y1="196" x2="252" y2="212" stroke="#0f8a72" stroke-width="6" stroke-linecap="round"/>
+
+  <!-- document with OCR text lines -->
+  <rect x="58" y="176" width="66" height="56" rx="6" fill="#ffffff" stroke="#d9dde3" stroke-width="2"/>
+  <rect x="68" y="188" width="46" height="5" rx="2.5" fill="#0f8a72"/>
+  <rect x="68" y="198" width="36" height="5" rx="2.5" fill="#c9d3e0"/>
+  <rect x="68" y="208" width="42" height="5" rx="2.5" fill="#c9d3e0"/>
+  <rect x="68" y="218" width="28" height="5" rx="2.5" fill="#c9d3e0"/>
+</svg>

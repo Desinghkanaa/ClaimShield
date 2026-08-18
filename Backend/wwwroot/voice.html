@@ -1,0 +1,556 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0" />
+
+    <title>ClaimShield Voice Assistant</title>
+
+    <style>
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background: #f4f7fb;
+            color: #1f2937;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 30px;
+        }
+
+        .card {
+            background: white;
+            border-radius: 16px;
+            padding: 30px;
+            box-shadow: 0 8px 30px rgba(0,0,0,0.08);
+        }
+
+        h1 {
+            margin-top: 0;
+        }
+
+        .status {
+            padding: 12px;
+            border-radius: 8px;
+            background: #eef2ff;
+            margin-bottom: 20px;
+        }
+
+        textarea,
+        input {
+            width: 100%;
+            box-sizing: border-box;
+            padding: 12px;
+            margin-top: 8px;
+            margin-bottom: 15px;
+            border: 1px solid #d1d5db;
+            border-radius: 8px;
+            font-size: 15px;
+        }
+
+        button {
+            border: none;
+            border-radius: 8px;
+            padding: 12px 18px;
+            margin: 5px;
+            cursor: pointer;
+            font-size: 15px;
+        }
+
+        #startButton {
+            background: #2563eb;
+            color: white;
+        }
+
+        #stopButton {
+            background: #dc2626;
+            color: white;
+        }
+
+        #sendButton {
+            background: #059669;
+            color: white;
+        }
+
+        #speakButton {
+            background: #7c3aed;
+            color: white;
+        }
+
+        button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .conversation {
+            margin-top: 25px;
+        }
+
+        .message {
+            padding: 14px;
+            border-radius: 10px;
+            margin-bottom: 10px;
+            white-space: pre-wrap;
+        }
+
+        .user {
+            background: #dbeafe;
+        }
+
+        .assistant {
+            background: #ecfdf5;
+        }
+
+        .small {
+            font-size: 13px;
+            color: #6b7280;
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="container">
+
+    <div class="card">
+
+        <h1>🛡️ ClaimShield Voice Assistant</h1>
+
+        <div id="status"
+             class="status">
+            Ready.
+        </div>
+
+        <label>
+            JWT Token
+        </label>
+
+        <input
+            id="token"
+            type="password"
+            placeholder="Paste your JWT token here" />
+
+        <label>
+            Claim ID
+        </label>
+
+        <input
+            id="claimId"
+            type="text"
+            value="534e726c-e098-4d2b-b262-da15e0b10d74"
+            placeholder="Claim ID" />
+
+        <label>
+            Message
+        </label>
+
+        <textarea
+            id="message"
+            rows="4"
+            placeholder="Speak or type your question..."></textarea>
+
+        <div>
+
+            <button id="startButton">
+                🎤 Start Listening
+            </button>
+
+            <button id="stopButton">
+                ⏹ Stop
+            </button>
+
+            <button id="sendButton">
+                Send
+            </button>
+
+            <button id="speakButton">
+                🔊 Speak Response
+            </button>
+
+        </div>
+
+        <p class="small">
+            Voice recognition runs in your browser.
+            ClaimShield sends only the recognized text to the API.
+        </p>
+
+        <div
+            id="conversation"
+            class="conversation">
+        </div>
+
+    </div>
+
+</div>
+
+<script>
+
+    // =========================================================
+    // ELEMENTS
+    // =========================================================
+
+    const statusElement =
+        document.getElementById("status");
+
+    const tokenElement =
+        document.getElementById("token");
+
+    const claimIdElement =
+        document.getElementById("claimId");
+
+    const messageElement =
+        document.getElementById("message");
+
+    const conversationElement =
+        document.getElementById("conversation");
+
+    const startButton =
+        document.getElementById("startButton");
+
+    const stopButton =
+        document.getElementById("stopButton");
+
+    const sendButton =
+        document.getElementById("sendButton");
+
+    const speakButton =
+        document.getElementById("speakButton");
+
+
+    // =========================================================
+    // SPEECH RECOGNITION
+    // =========================================================
+
+    const SpeechRecognition =
+        window.SpeechRecognition ||
+        window.webkitSpeechRecognition;
+
+    let recognition = null;
+
+    let lastResponse = "";
+
+
+    if (SpeechRecognition) {
+
+        recognition =
+            new SpeechRecognition();
+
+        recognition.continuous = false;
+
+        recognition.interimResults = false;
+
+        recognition.lang = "en-IN";
+
+
+        recognition.onstart = function () {
+
+            statusElement.textContent =
+                "🎤 Listening...";
+
+            startButton.disabled = true;
+
+            stopButton.disabled = false;
+        };
+
+
+        recognition.onresult = function (event) {
+
+            const transcript =
+                event.results[0][0].transcript;
+
+            messageElement.value =
+                transcript;
+
+            statusElement.textContent =
+                "Speech recognized.";
+
+            sendMessage();
+        };
+
+
+        recognition.onerror = function (event) {
+
+            statusElement.textContent =
+                "Voice recognition error: " +
+                event.error;
+
+            startButton.disabled = false;
+
+            stopButton.disabled = true;
+        };
+
+
+        recognition.onend = function () {
+
+            startButton.disabled = false;
+
+            stopButton.disabled = true;
+        };
+
+    }
+    else {
+
+        statusElement.textContent =
+            "Speech recognition is not supported by this browser.";
+    }
+
+
+    // =========================================================
+    // START LISTENING
+    // =========================================================
+
+    startButton.onclick = function () {
+
+        if (!recognition) {
+
+            alert(
+                "Speech recognition is not supported by this browser."
+            );
+
+            return;
+        }
+
+        recognition.start();
+    };
+
+
+    // =========================================================
+    // STOP LISTENING
+    // =========================================================
+
+    stopButton.onclick = function () {
+
+        if (recognition) {
+            recognition.stop();
+        }
+    };
+
+
+    // =========================================================
+    // SEND BUTTON
+    // =========================================================
+
+    sendButton.onclick = function () {
+
+        sendMessage();
+    };
+
+
+    // =========================================================
+    // SEND TO CLAIMSHIELD AI
+    // =========================================================
+
+    async function sendMessage() {
+
+        const token =
+            tokenElement.value.trim();
+
+        const claimId =
+            claimIdElement.value.trim();
+
+        const message =
+            messageElement.value.trim();
+
+
+        if (!token) {
+
+            alert(
+                "Please enter your JWT token."
+            );
+
+            return;
+        }
+
+
+        if (!message) {
+
+            alert(
+                "Please enter or speak a message."
+            );
+
+            return;
+        }
+
+
+        addMessage(
+            "You",
+            message,
+            "user"
+        );
+
+
+        statusElement.textContent =
+            "Thinking...";
+
+
+        try {
+
+            const response =
+                await fetch(
+                    "/api/Ai/chat",
+                    {
+                        method: "POST",
+
+                        headers: {
+                            "Content-Type":
+                                "application/json",
+
+                            "Authorization":
+                                "Bearer " + token
+                        },
+
+                        body:
+                            JSON.stringify({
+                                message: message,
+
+                                claimId:
+                                    claimId || null
+                            })
+                    }
+                );
+
+
+            const data =
+                await response.json();
+
+
+            if (!response.ok) {
+
+                throw new Error(
+                    data.message ||
+                    "AI request failed."
+                );
+            }
+
+
+            lastResponse =
+                data.message || "";
+
+
+            addMessage(
+                "ClaimShield AI",
+                lastResponse,
+                "assistant"
+            );
+
+
+            statusElement.textContent =
+                "Response received.";
+
+
+            // Automatically speak the response.
+
+            speakText(lastResponse);
+
+        }
+        catch (error) {
+
+            statusElement.textContent =
+                "Request failed.";
+
+            addMessage(
+                "Error",
+                error.message,
+                "assistant"
+            );
+        }
+    }
+
+
+    // =========================================================
+    // DISPLAY MESSAGE
+    // =========================================================
+
+    function addMessage(
+        sender,
+        message,
+        cssClass) {
+
+        const element =
+            document.createElement("div");
+
+        element.className =
+            "message " + cssClass;
+
+        element.textContent =
+            sender + ": " + message;
+
+        conversationElement
+            .appendChild(element);
+
+
+        conversationElement
+            .scrollTop =
+            conversationElement.scrollHeight;
+    }
+
+
+    // =========================================================
+    // TEXT TO SPEECH
+    // =========================================================
+
+    function speakText(text) {
+
+        if (!window.speechSynthesis) {
+
+            return;
+        }
+
+
+        window.speechSynthesis.cancel();
+
+
+        const utterance =
+            new SpeechSynthesisUtterance(text);
+
+
+        utterance.lang =
+            "en-IN";
+
+        utterance.rate =
+            0.95;
+
+        utterance.pitch =
+            1.0;
+
+
+        window.speechSynthesis.speak(
+            utterance
+        );
+    }
+
+
+    // =========================================================
+    // SPEAK RESPONSE BUTTON
+    // =========================================================
+
+    speakButton.onclick = function () {
+
+        if (lastResponse) {
+
+            speakText(lastResponse);
+
+        }
+        else {
+
+            alert(
+                "There is no AI response to speak yet."
+            );
+        }
+    };
+
+
+    // =========================================================
+    // INITIAL STATE
+    // =========================================================
+
+    stopButton.disabled = true;
+
+</script>
+
+</body>
+</html>
